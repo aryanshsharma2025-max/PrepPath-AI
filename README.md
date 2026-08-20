@@ -1,5 +1,9 @@
 # PrepPath AI
 
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://preppath-ai.vercel.app)
+[![GitHub Repository](https://img.shields.io/badge/GitHub-PrepPath--AI-blue?style=for-the-badge&logo=github)](https://github.com/aryanshsharma2025-max/PrepPath-AI)
+
+> 🌐 **Live Website:** [https://preppath-ai.vercel.app](https://preppath-ai.vercel.app)  
 > **From Opportunity to Application-Ready**
 
 PrepPath AI is an AI-powered **Opportunity-to-Application Readiness** platform. While the initial MVP focuses specifically on **Scholarships**, the system architecture is designed from the ground up to be extensible for future opportunity types including internships, competitions, fellowships, and government schemes.
