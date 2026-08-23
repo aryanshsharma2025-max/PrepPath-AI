@@ -1,142 +1,173 @@
 # PrepPath AI
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://preppath-ai.vercel.app)
-[![GitHub Repository](https://img.shields.io/badge/GitHub-PrepPath--AI-blue?style=for-the-badge&logo=github)](https://github.com/aryanshsharma2025-max/PrepPath-AI)
+[![Backend Test Suite](https://img.shields.io/badge/Pytest-35%20Passing-10B981?style=for-the-badge&logo=pytest&logoColor=white)](https://github.com/aryanshsharma2025-max/PrepPath-AI)
+[![FastAPI Backend](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://github.com/aryanshsharma2025-max/PrepPath-AI)
+[![React Frontend](https://img.shields.io/badge/React%2018-Vite-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://github.com/aryanshsharma2025-max/PrepPath-AI)
+[![Live UI Demo](https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel)](https://preppath-ai.vercel.app)
 
-> 🌐 **Live Website:** [https://preppath-ai.vercel.app](https://preppath-ai.vercel.app)  
-> **From Opportunity to Application-Ready**
-
-PrepPath AI is an AI-powered **Opportunity-to-Application Readiness** platform. While the initial MVP focuses specifically on **Scholarships**, the system architecture is designed from the ground up to be extensible for future opportunity types including internships, competitions, fellowships, and government schemes.
-
----
-
-## Core Product Principle
-
-**Eligibility and readiness are NOT the same thing.**
-
-A student can meet all formal eligibility criteria for an opportunity but still be completely unready to apply due to missing documents, incomplete profile fields, or tight deadlines. 
-
-PrepPath AI evaluates four distinct dimensions:
-1. **Eligibility**: Does the candidate satisfy hard rules and constraints?
-2. **Application Readiness**: Does the candidate possess all required documents and structured profile data?
-3. **Application Risk**: What inconsistencies, gaps, or deadlines pose a threat to application success?
-4. **Next Best Action**: Clear, prioritized steps to bridge readiness gaps.
+> **Opportunity-to-Application Readiness Platform**  
+> Bridges scholarship discovery and application readiness through a dual-layer architecture: **LLM schema extraction** + **deterministic rule evaluation**.
 
 ---
 
-## AI & Rule Engine Architecture
+## 📌 Core Engineering Philosophy
 
-To guarantee accuracy and eliminate hallucinated eligibility decisions, PrepPath AI enforces strict separation between decision logic and AI explanations:
+### *Eligibility ≠ Application Readiness*
+
+A candidate may fulfill every formal eligibility criterion (e.g. minimum GPA, annual family income limit, domicile state) yet remain completely unready to apply due to missing income certificates, unverified caste affidavits, or short application deadlines.
+
+To solve this without sacrificing reliability, PrepPath AI strictly enforces **zero-hallucination evaluation**:
+- **LLMs (Google Gemini 2.5/Flash)** are utilized solely for *unstructured document parsing* and *schema extraction*.
+- **Hard evaluation decisions** are executed exclusively by a *deterministic Python rule engine*.
+
+---
+
+## 🏗️ System Architecture & Data Flow
 
 ```
-Opportunity Document (PDF / URL)
-           ↓
-     AI Extraction
-           ↓
- Structured Requirements
-           ↓
- Deterministic Rule Engine  <--- Decision Maker
-           ↓
-     Eligibility Result
-           ↓
-  AI-Generated Explanation  <--- Explainer & Assistant
-```
-
-- **Rule Engine**: Evaluates criteria deterministically.
-- **AI (Gemini)**: Extracts structured criteria and provides user assistance, document insights, and clear explanations.
-
----
-
-## Technical Architecture & Stack
-
-- **Frontend**: React, Vite, JavaScript, Tailwind CSS
-- **Backend**: Python, FastAPI, Uvicorn
-- **Database**: Supabase PostgreSQL *(Future Phase)*
-- **Authentication**: Supabase Auth *(Future Phase)*
-- **Storage**: Supabase Storage *(Future Phase)*
-- **AI**: Gemini API *(Future Phase)*
-- **PDF Processing**: PyMuPDF *(Future Phase)*
-
----
-
-## Project Structure
-
-```
-PrepPath-AI/
-├── frontend/             # React + Vite + Tailwind CSS User Interface
-│   ├── src/
-│   │   ├── components/   # Reusable UI Components
-│   │   ├── pages/        # Route / Screen Components
-│   │   ├── layouts/      # Application Layout Shells
-│   │   ├── services/     # API Integration Layer
-│   │   ├── hooks/        # Custom React Hooks
-│   │   ├── utils/        # Helper Utilities
-│   │   └── App.jsx       # Root Application Component
-│   ├── package.json
-│   └── README.md
-│
-├── backend/              # FastAPI Python Service
-│   ├── app/
-│   │   ├── main.py       # FastAPI Entrypoint & CORS setup
-│   │   ├── config.py     # Environment & Application Settings
-│   │   ├── models/       # Data Models & Entities
-│   │   ├── schemas/      # Pydantic Schemas & DTOs
-│   │   ├── routes/       # API Endpoint Routers
-│   │   ├── services/     # Business Logic & Deterministic Engine
-│   │   ├── ai/           # Gemini AI Extraction & Explanation Services
-│   │   └── utils/        # Shared Utilities
-│   ├── requirements.txt
-│   └── README.md
-│
-├── docs/                 # Product Specifications & Architecture Docs
-├── data/                 # Sample Data & Opportunity Fixtures
-├── .env.example          # Environment Variable Templates
-└── README.md
+Scholarship Document (Official PDF)
+                │
+                ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ 1. PDF Parsing Pipeline (PyMuPDF / pypdf)              │
+ │    • Extracts raw text with size & page-count limits   │
+ │    • Sanitizes multi-column and tabular layouts        │
+ └────────────────────────────────────────────────────────┘
+                │
+                ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ 2. Structured Schema Extraction (Gemini 2.5/Flash)    │
+ │    • Enforces Pydantic OpportunityExtraction schema    │
+ │    • Resolves criteria: age, income, marks, domicile   │
+ │    • Identifies mandatory vs optional document list    │
+ └────────────────────────────────────────────────────────┘
+                │
+                ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ 3. Deterministic Rule Engine (Pure Python Engine)      │
+ │    • Compares Student Profile vs Extracted Criteria    │
+ │    • Strict Type Coercion (numeric thresholds, bools)  │
+ │    • Flags: PASS | FAIL | UNKNOWN                      │
+ └────────────────────────────────────────────────────────┘
+                │
+                ▼
+ ┌────────────────────────────────────────────────────────┐
+ │ 4. Readiness & Document Checklist Engine               │
+ │    • Flags Missing Mandatory Documents                 │
+ │    • Computes overall readiness status & action items  │
+ └────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Quick Start (Local Development)
+## 🧪 Automated Test Suite (35 Passing Tests)
 
-### 1. Backend Setup
+The backend maintains strict test coverage across business logic, PDF parsing edge cases, Pydantic schemas, and FastAPI HTTP endpoints.
 
 ```bash
 cd backend
-python -m venv .venv
-# Windows PowerShell / CMD:
-.venv\Scripts\activate
-pip install -r requirements.txt
+pytest tests/ -v
+```
 
-# Run FastAPI Server
+### Test Breakdown:
+- **`tests/test_eligibility.py` (22 Tests)**:
+  - Age threshold comparisons (`<`, `<=`, `>`, `>=`)
+  - Family income limits with currency & separator cleaning
+  - Academic percentage vs board percentile boundary handling
+  - Domicile state, reservation categories, and BPL card verification
+  - Attendance rate parsing (percentage vs qualitative compliance)
+  - Missing field handling (correctly returns `UNKNOWN` instead of false rejection)
+- **`tests/test_routes.py` (8 Tests)**:
+  - `GET /health` and `GET /` root endpoints
+  - `GET /api/profile` and `POST /api/profile` student profile updates
+  - `POST /api/opportunities/analyze` input validation (non-PDF rejection, corrupted payload handling)
+  - `POST /api/opportunities/{id}/eligibility` 404 handling and deterministic end-to-end evaluation
+- **`tests/test_pdf.py` (3 Tests)**:
+  - Valid text extraction, empty payload detection, and multi-page stream parsing
+- **`tests/test_schemas.py` (2 Tests)**:
+  - Pydantic model serialization and schema integrity
+
+---
+
+## 🛠️ Technology Stack
+
+| Domain | Technology | Purpose |
+|---|---|---|
+| **Backend API** | Python 3.11+, FastAPI, Uvicorn | High-performance asynchronous REST API |
+| **Validation & Data** | Pydantic v2 | Strict schema contracts and type coercion |
+| **AI Extraction** | Google GenAI SDK (Gemini Flash) | Structured JSON criteria extraction from documents |
+| **Document Processing** | PyMuPDF / pdfplumber | PDF stream extraction and page bounding |
+| **Testing** | Pytest, FastAPI TestClient, AnyIO | Automated unit, route, and integration tests |
+| **Frontend UI** | React 18, Vite, Tailwind CSS, Lucide | Modern dark-mode single-page interface |
+
+---
+
+## 🚀 Local Setup & Installation
+
+### Prerequisites
+- Python `>= 3.11`
+- Node.js `>= 18.0.0`
+- Google Gemini API Key
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/aryanshsharma2025-max/PrepPath-AI.git
+cd PrepPath-AI
+```
+
+### 2. Backend Setup
+```bash
+cd backend
+python -m venv .venv
+
+# On Windows:
+.venv\Scripts\activate
+# On macOS/Linux:
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+Create a `backend/.env` file:
+```env
+GEMINI_API_KEY=your_gemini_api_key_here
+GEMINI_MODEL=gemini-2.5-flash
+PROJECT_NAME="PrepPath AI API"
+ALLOWED_ORIGINS=["http://localhost:5173", "http://127.0.0.1:5173"]
+```
+
+Run tests and start backend server:
+```bash
+pytest tests/
 uvicorn app.main:app --reload --port 8000
 ```
-- API Health Check: `http://localhost:8000/health`
-- OpenAPI Docs: `http://localhost:8000/docs`
 
-### 2. Frontend Setup
-
+### 3. Frontend Setup
 ```bash
-cd frontend
+cd ../frontend
 npm install
 npm run dev
 ```
-- Web Application: `http://localhost:5173`
+Open `http://localhost:5173` in your browser.
 
 ---
 
-## Initial Health Endpoint Specification
+## 📊 Implementation Status & Roadmap
 
-- **`GET /health`**
-  - **Response**:
-    ```json
-    {
-      "status": "healthy",
-      "service": "PrepPath AI API"
-    }
-    ```
+### ✅ Implemented & Tested
+- [x] PyMuPDF / pypdf document ingestion pipeline
+- [x] Google GenAI structured prompt engineering & Pydantic validation
+- [x] Deterministic multi-variable rule evaluation engine
+- [x] Student profile CRUD endpoints with fallback memory store
+- [x] 35 automated Pytest unit and route integration tests
+- [x] Responsive dark-mode React 18 / Tailwind CSS dashboard
+
+### 🔄 Planned / Next Phase
+- [ ] Cloud deployment of FastAPI backend microservice (Docker / Fly.io / Render)
+- [ ] Supabase Auth OAuth session persistence
+- [ ] Multi-document student credential vault for automated document matching
 
 ---
 
-## License
-
-Private & Confidential - PrepPath AI MVP.
+## 📄 License
+MIT License.
